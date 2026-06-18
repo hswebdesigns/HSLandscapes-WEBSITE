@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>York Landscapes</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1a2e1a;
+    --accent: #5a9e4e;
+    --accent2: #a8d5a0;
+    --bg: #f4f7f4;
+    --bg2: #e2ece2;
+    --text: #1a2e1a;
+    --text-light: #4a6b4a;
+    --white: #fafffe;
+    --font-heading: 'Cormorant Garamond', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+  #editor-toggle {
+    position: fixed; top: 20px; right: 20px; z-index: 1000;
+    background: var(--accent); color: var(--white); border: none;
+    padding: 10px 18px; border-radius: 30px; font-family: var(--font-body);
+    font-size: 13px; font-weight: 700; letter-spacing: 1px; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(90,158,78,0.45); transition: all 0.3s;
+  }
+  #editor-toggle:hover { background: var(--primary); transform: translateY(-2px); }
+
+  #editor-panel {
+    position: fixed; top: 0; right: -385px; width: 375px; height: 100vh;
+    background: var(--white); z-index: 999; overflow-y: auto;
+    box-shadow: -8px 0 40px rgba(26,46,26,0.15);
+    transition: right 0.4s cubic-bezier(0.4,0,0.2,1); padding: 0 0 40px;
+  }
+  #editor-panel.open { right: 0; }
+
+  .editor-header {
+    background: var(--primary); color: var(--white);
+    padding: 24px 24px 20px; position: sticky; top: 0; z-index: 1;
+  }
+  .editor-header h2 { font-family: var(--font-heading); font-size: 20px; margin-bottom: 4px; }
+  .editor-header p { font-size: 12px; opacity: 0.7; letter-spacing: 0.5px; margin-bottom: 16px; }
+
+  #export-btn {
+    width: 100%; background: var(--accent); color: var(--white); border: none;
+    padding: 12px 16px; border-radius: 10px; font-family: var(--font-body);
+    font-size: 13px; font-weight: 700; letter-spacing: 1px; cursor: pointer;
+    transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  #export-btn:hover { background: #4a8e3e; transform: translateY(-1px); }
+  #export-btn.success { background: #2d6b4f; }
+
+  .editor-section { padding: 20px 24px; border-bottom: 1px solid var(--bg2); }
+  .editor-section h3 {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+  }
+  .editor-field { margin-bottom: 14px; }
+  .editor-field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-light); margin-bottom: 5px; }
+  .editor-field input[type="text"],
+  .editor-field input[type="tel"],
+  .editor-field input[type="email"],
+  .editor-field textarea,
+  .editor-field select {
+    width: 100%; border: 1.5px solid var(--bg2); background: var(--bg);
+    color: var(--text); padding: 8px 12px; border-radius: 8px;
+    font-family: var(--font-body); font-size: 13px; outline: none; transition: border 0.2s;
+  }
+  .editor-field input:focus, .editor-field textarea:focus { border-color: var(--accent); }
+  .editor-field textarea { resize: vertical; min-height: 70px; }
+
+  .color-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .color-swatch { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; color: var(--text-light); font-weight: 700; }
+  .color-swatch input[type="color"] { width: 44px; height: 36px; border: none; border-radius: 8px; cursor: pointer; padding: 2px; background: transparent; }
+
+  .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .preset-btn {
+    border: 2px solid transparent; border-radius: 10px; padding: 10px 8px;
+    cursor: pointer; font-family: var(--font-body); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.5px; transition: all 0.2s; text-align: center;
+  }
+  .preset-btn:hover { transform: translateY(-2px); }
+  .preset-btn.active { border-color: var(--accent) !important; }
+
+  .svc-item-editor { background: var(--bg); border-radius: 10px; padding: 12px; margin-bottom: 10px; border: 1.5px solid var(--bg2); }
+  .svc-item-editor .row { display: flex; gap: 8px; margin-bottom: 6px; }
+  .remove-btn { background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; width: 28px; height: 28px; cursor: pointer; font-size: 16px; line-height: 1; flex-shrink: 0; }
+  .remove-btn:hover { background: #fecaca; }
+  .add-btn { width: 100%; background: var(--bg2); border: 2px dashed var(--accent2); color: var(--accent); border-radius: 10px; padding: 10px; cursor: pointer; font-family: var(--font-body); font-weight: 700; font-size: 13px; transition: all 0.2s; }
+  .add-btn:hover { background: var(--accent2); }
+
+  #hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: flex-end; padding: 80px 60px;
+    position: relative; overflow: hidden;
+  }
+  @media(max-width:700px){ #hero { padding: 80px 24px 60px; } }
+
+  .hero-photo {
+    position: absolute; inset: 0; z-index: 0;
+    background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&auto=format&fit=crop&q=80');
+    background-size: cover; background-position: center;
+  }
+  .hero-photo::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,22,10,0.88) 0%, rgba(10,22,10,0.38) 55%, rgba(10,22,10,0.08) 100%);
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 700px; }
+  .hero-tag {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 4px;
+    text-transform: uppercase; color: var(--accent2);
+    background: rgba(90,158,78,0.18); border: 1px solid rgba(168,213,160,0.3);
+    padding: 6px 16px; border-radius: 30px; margin-bottom: 24px;
+    animation: fadeUp 0.8s ease both;
+  }
+  #hero h1 {
+    font-family: var(--font-heading); font-size: clamp(48px, 8vw, 96px); font-weight: 600;
+    color: var(--white); line-height: 1.0; margin-bottom: 24px;
+    animation: fadeUp 0.9s 0.1s ease both;
+  }
+  #hero h1 em { color: var(--accent2); font-style: italic; }
+  .hero-desc {
+    font-size: 17px; color: rgba(250,255,254,0.75); max-width: 500px;
+    line-height: 1.7; margin-bottom: 40px; animation: fadeUp 1s 0.2s ease both;
+  }
+  .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; animation: fadeUp 1s 0.3s ease both; }
+  .btn-primary {
+    background: var(--accent); color: var(--white); border: none;
+    padding: 16px 36px; border-radius: 4px; font-family: var(--font-body);
+    font-size: 14px; font-weight: 700; letter-spacing: 1px; cursor: pointer;
+    transition: all 0.3s; text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { background: #4a8e3e; transform: translateY(-3px); box-shadow: 0 8px 30px rgba(90,158,78,0.4); }
+  .btn-outline {
+    background: transparent; color: var(--white); border: 2px solid rgba(250,255,254,0.4);
+    padding: 14px 34px; border-radius: 4px; font-family: var(--font-body);
+    font-size: 14px; font-weight: 700; letter-spacing: 1px; cursor: pointer;
+    transition: all 0.3s; text-decoration: none; display: inline-block;
+  }
+  .btn-outline:hover { border-color: var(--accent2); color: var(--accent2); transform: translateY(-3px); }
+  .scroll-hint {
+    position: absolute; bottom: 32px; right: 60px; z-index: 1;
+    display: flex; align-items: center; gap: 10px;
+    color: rgba(250,255,254,0.45); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  }
+  .scroll-hint::before { content: ''; display: block; width: 40px; height: 1px; background: rgba(250,255,254,0.25); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+  #banner { background: var(--accent); color: var(--white); padding: 14px 24px; text-align: center; font-size: 14px; font-weight: 700; letter-spacing: 1px; }
+
+  #about {
+    padding: 110px 60px; max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 90px; align-items: center;
+  }
+  @media(max-width:800px){ #about { grid-template-columns: 1fr; gap: 40px; padding: 60px 24px; } }
+
+  .about-img { aspect-ratio: 4/5; border-radius: 4px; overflow: hidden; background: var(--bg2); position: relative; }
+  .about-img-inner {
+    width: 100%; height: 100%;
+    background-image: url('https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&auto=format&fit=crop&q=80');
+    background-size: cover; background-position: center;
+  }
+  .about-badge {
+    position: absolute; bottom: 24px; left: 24px; background: var(--primary); color: var(--white);
+    padding: 16px 20px; border-radius: 4px; font-family: var(--font-heading); font-size: 14px;
+  }
+  .about-badge strong { display: block; font-size: 32px; font-weight: 700; color: var(--accent2); }
+  .about-tag { font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .about-text h2 { font-family: var(--font-heading); font-size: clamp(32px, 4vw, 50px); line-height: 1.15; margin-bottom: 24px; color: var(--primary); }
+  .about-text p { font-size: 16px; line-height: 1.8; color: var(--text-light); margin-bottom: 16px; }
+  .about-stats { display: flex; gap: 32px; margin-top: 36px; padding-top: 36px; border-top: 1px solid var(--bg2); }
+  .stat-num { font-family: var(--font-heading); font-size: 40px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-light); }
+
+  #services { background: var(--primary); padding: 110px 60px; }
+  @media(max-width:800px){ #services { padding: 60px 24px; } }
+  .services-inner { max-width: 1200px; margin: 0 auto; }
+  .section-header { text-align: center; margin-bottom: 60px; }
+  .section-tag { font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--accent2); margin-bottom: 12px; }
+  .section-header h2 { font-family: var(--font-heading); font-size: clamp(32px, 4vw, 54px); color: var(--white); line-height: 1.1; }
+  .services-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 48px; flex-wrap: wrap; }
+  .svc-tab {
+    background: rgba(250,255,254,0.06); color: rgba(250,255,254,0.55);
+    border: 1.5px solid rgba(250,255,254,0.1); padding: 10px 24px; border-radius: 4px;
+    font-family: var(--font-body); font-size: 13px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all 0.3s;
+  }
+  .svc-tab.active, .svc-tab:hover { background: var(--accent); color: var(--white); border-color: var(--accent); }
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .svc-card {
+    background: rgba(250,255,254,0.04); border: 1px solid rgba(168,213,160,0.15);
+    border-radius: 4px; padding: 28px; transition: all 0.3s;
+  }
+  .svc-card:hover { background: rgba(90,158,78,0.12); border-color: rgba(168,213,160,0.35); transform: translateY(-4px); }
+  .svc-icon { font-size: 28px; margin-bottom: 14px; }
+  .svc-name { font-family: var(--font-heading); font-size: 22px; color: var(--white); margin-bottom: 8px; }
+  .svc-desc { font-size: 14px; color: rgba(250,255,254,0.5); line-height: 1.6; }
+  .svc-price { font-family: var(--font-heading); font-size: 18px; color: var(--accent2); margin-top: 14px; }
+
+  #contact { padding: 110px 60px; max-width: 1000px; margin: 0 auto; text-align: center; }
+  @media(max-width:800px){ #contact { padding: 60px 24px; } }
+  #contact h2 { font-family: var(--font-heading); font-size: clamp(32px, 4vw, 52px); margin-bottom: 16px; color: var(--primary); }
+  #contact > p { font-size: 16px; color: var(--text-light); margin-bottom: 60px; line-height: 1.7; }
+  .contact-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+  .contact-card { background: var(--white); border: 1.5px solid var(--bg2); border-radius: 4px; padding: 32px 20px; transition: all 0.3s; }
+  .contact-card:hover { border-color: var(--accent2); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(90,158,78,0.1); }
+  .contact-card .icon { font-size: 30px; margin-bottom: 12px; }
+  .contact-card h3 { font-family: var(--font-heading); font-size: 20px; margin-bottom: 8px; color: var(--primary); }
+  .contact-card p { font-size: 14px; color: var(--text-light); margin: 0; line-height: 1.6; }
+
+  footer { background: var(--primary); color: rgba(250,255,254,0.45); text-align: center; padding: 32px 24px; font-size: 13px; }
+
+  #editor-panel::-webkit-scrollbar { width: 6px; }
+  #editor-panel::-webkit-scrollbar-thumb { background: var(--bg2); border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<button id="editor-toggle" onclick="toggleEditor()">&#9999;&#65039; CUSTOMISE</button>
+
+<div id="editor-panel">
+  <div class="editor-header">
+    <h2>Customise Your Site</h2>
+    <p>Changes update live as you type</p>
+    <button id="export-btn" onclick="exportSite()">&#11015; Save &amp; Export Website</button>
+  </div>
+
+  <div class="editor-section">
+    <h3>Theme Presets</h3>
+    <div class="preset-grid">
+      <button class="preset-btn active" style="background:#1a2e1a;color:#a8d5a0;border-color:#a8d5a0" onclick="applyPreset('forest',event)">&#127807; Forest</button>
+      <button class="preset-btn" style="background:#1a2030;color:#7eb8d4;border-color:#7eb8d4" onclick="applyPreset('slate',event)">&#127754; Slate</button>
+      <button class="preset-btn" style="background:#2e2010;color:#d4a84b;border-color:#d4a84b" onclick="applyPreset('earth',event)">&#129704; Earth</button>
+      <button class="preset-btn" style="background:#1e1e1e;color:#c8c8c8;border-color:#c8c8c8" onclick="applyPreset('mono',event)">&#11035; Mono</button>
+    </div>
+  </div>
+
+  <div class="editor-section">
+    <h3>Colours</h3>
+    <div class="color-row">
+      <div class="color-swatch"><input type="color" id="col-primary" value="#1a2e1a" oninput="setColor('--primary',this.value)"><span>Primary</span></div>
+      <div class="color-swatch"><input type="color" id="col-accent" value="#5a9e4e" oninput="setColor('--accent',this.value)"><span>Accent</span></div>
+      <div class="color-swatch"><input type="color" id="col-accent2" value="#a8d5a0" oninput="setColor('--accent2',this.value)"><span>Soft</span></div>
+      <div class="color-swatch"><input type="color" id="col-bg" value="#f4f7f4" oninput="setColor('--bg',this.value)"><span>Background</span></div>
+    </div>
+  </div>
+
+  <div class="editor-section">
+    <h3>Company Info</h3>
+    <div class="editor-field"><label>Company Name</label><input type="text" id="e-name" value="York Landscapes" oninput="update('company-name',this.value)"></div>
+    <div class="editor-field"><label>Tagline</label><input type="text" id="e-tagline" value="Transforming outdoor spaces across Yorkshire" oninput="update('company-tagline',this.value)"></div>
+    <div class="editor-field"><label>Hero Description</label><textarea id="e-herodesc" oninput="update('hero-desc',this.value)">From garden design to full landscaping, we bring your outdoor vision to life - beautifully crafted, built to last.</textarea></div>
+    <div class="editor-field"><label>Banner Text</label><input type="text" id="e-banner" value="Free quotes available - Serving York and surrounding areas - Fully insured" oninput="update('banner-text',this.value)"></div>
+  </div>
+
+  <div class="editor-section">
+    <h3>About Section</h3>
+    <div class="editor-field"><label>About Title</label><input type="text" id="e-about-title" value="York's trusted landscaping specialists." oninput="update('about-title',this.value)"></div>
+    <div class="editor-field"><label>About Paragraph 1</label><textarea id="e-about-p1" oninput="update('about-p1',this.value)">Founded in York over 15 years ago, we have grown from a small team of two into one of the most trusted landscaping companies in North Yorkshire. We take pride in every project - from compact urban gardens to sweeping rural estates.</textarea></div>
+    <div class="editor-field"><label>About Paragraph 2</label><textarea id="e-about-p2" oninput="update('about-p2',this.value)">All our work is fully designed in-house, using sustainable materials and proven techniques. We are RHS-affiliated and carry full public liability insurance.</textarea></div>
+    <div class="editor-field"><label>Stat 1 Number</label><input type="text" id="e-stat1n" value="15+" oninput="updateStat1Num(this.value)"></div>
+    <div class="editor-field"><label>Stat 1 Label</label><input type="text" id="e-stat1l" value="Years Experience" oninput="updateStat1Label(this.value)"></div>
+    <div class="editor-field"><label>Stat 2 Number</label><input type="text" id="e-stat2n" value="500+" oninput="update('stat2-num',this.value)"></div>
+    <div class="editor-field"><label>Stat 2 Label</label><input type="text" id="e-stat2l" value="Projects Completed" oninput="update('stat2-label',this.value)"></div>
+  </div>
+
+  <div class="editor-section">
+    <h3>Services</h3>
+    <div id="service-editor"></div>
+    <button class="add-btn" onclick="addService()">+ Add Service</button>
+  </div>
+
+  <div class="editor-section">
+    <h3>Contact Details</h3>
+    <div class="editor-field"><label>Address</label><input type="text" id="e-address" value="Unit 4, Skelton Industrial Estate, York, YO30 1NP" oninput="update('company-address',this.value)"></div>
+    <div class="editor-field"><label>Phone</label><input type="tel" id="e-phone" value="01904 567 890" oninput="update('company-phone',this.value)"></div>
+    <div class="editor-field"><label>Email</label><input type="email" id="e-email" value="info@yorklandscapes.co.uk" oninput="update('company-email',this.value)"></div>
+    <div class="editor-field"><label>Working Hours</label><textarea id="e-hours" oninput="update('company-hours',this.value)">Mon-Fri: 7:30am - 5:30pm
+Saturday: 8:00am - 1:00pm
+Sunday: Closed</textarea></div>
+    <div class="editor-field"><label>Footer Text</label><input type="text" id="e-footer" value="York Landscapes Ltd - Registered in England - Fully Insured" oninput="update('footer-text',this.value)"></div>
+  </div>
+</div>
+
+<section id="hero">
+  <div class="hero-photo"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Based in York, North Yorkshire</div>
+    <h1 id="company-name">York <em>Landscapes</em></h1>
+    <p class="hero-desc" id="hero-desc">From garden design to full landscaping, we bring your outdoor vision to life - beautifully crafted, built to last.</p>
+    <div class="hero-btns">
+      <a href="#services" class="btn-primary">Our Services</a>
+      <a href="#contact" class="btn-outline">Get a Free Quote</a>
+    </div>
+  </div>
+  <div class="scroll-hint">Scroll to explore</div>
+</section>
+
+<div id="banner">
+  <span id="banner-text">Free quotes available - Serving York and surrounding areas - Fully insured</span>
+</div>
+
+<section id="about">
+  <div class="about-img">
+    <div class="about-img-inner"></div>
+    <div class="about-badge">
+      <strong id="stat1-num">15+</strong>
+      <span id="stat1-label">Years Experience</span>
+    </div>
+  </div>
+  <div class="about-text">
+    <div class="about-tag">Who We Are</div>
+    <h2 id="about-title">York's trusted landscaping specialists.</h2>
+    <p id="about-p1">Founded in York over 15 years ago, we have grown from a small team of two into one of the most trusted landscaping companies in North Yorkshire. We take pride in every project - from compact urban gardens to sweeping rural estates.</p>
+    <p id="about-p2">All our work is fully designed in-house, using sustainable materials and proven techniques. We are RHS-affiliated and carry full public liability insurance.</p>
+    <div class="about-stats">
+      <div>
+        <div class="stat-num" id="stat2-num">500+</div>
+        <div class="stat-label" id="stat2-label">Projects Completed</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="services-inner">
+    <div class="section-header">
+      <div class="section-tag">What We Do</div>
+      <h2 id="company-tagline">Transforming outdoor spaces across Yorkshire</h2>
+    </div>
+    <div class="services-tabs" id="svc-tabs"></div>
+    <div class="services-grid" id="svc-grid"></div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="section-tag">Get In Touch</div>
+  <h2>Let's Talk About Your Garden</h2>
+  <p>Whether you have a clear vision or just a rough idea, we would love to hear from you. We offer free, no-obligation quotes across York and the surrounding area.</p>
+  <div class="contact-cards">
+    <div class="contact-card"><div class="icon">&#128205;</div><h3>Location</h3><p id="company-address">Unit 4, Skelton Industrial Estate, York, YO30 1NP</p></div>
+    <div class="contact-card"><div class="icon">&#128336;</div><h3>Hours</h3><p id="company-hours" style="white-space:pre-line">Mon-Fri: 7:30am - 5:30pm
+Saturday: 8:00am - 1:00pm
+Sunday: Closed</p></div>
+    <div class="contact-card"><div class="icon">&#128222;</div><h3>Call Us</h3><p id="company-phone">01904 567 890</p></div>
+    <div class="contact-card"><div class="icon">&#9993;&#65039;</div><h3>Email</h3><p id="company-email">info@yorklandscapes.co.uk</p></div>
+  </div>
+</section>
+
+<footer><p id="footer-text">York Landscapes Ltd - Registered in England - Fully Insured</p></footer>
+
+<script>
+let serviceData = [
+  {category:"Design",icon:"\u270f\ufe0f",name:"Garden Design",desc:"Full design service from initial concept to planting plans and 3D visualisations.",price:"From \u00a3400"},
+  {category:"Design",icon:"\ud83c\udf33",name:"Planting Schemes",desc:"Seasonal colour, structure planting and wildlife-friendly borders tailored to your soil.",price:"From \u00a3200"},
+  {category:"Construction",icon:"\ud83e\uddf1",name:"Patios & Paving",desc:"Natural stone, porcelain and block paving installed to last. All groundwork included.",price:"From \u00a31,200"},
+  {category:"Construction",icon:"\ud83e\udeb5",name:"Decking & Structures",desc:"Hardwood and composite decking, pergolas, raised beds and bespoke garden buildings.",price:"From \u00a3800"},
+  {category:"Construction",icon:"\ud83d\udca7",name:"Water Features",desc:"Ponds, rills, fountains and naturalistic streams designed and built from scratch.",price:"From \u00a3600"},
+  {category:"Maintenance",icon:"\ud83c\udf3f",name:"Garden Maintenance",desc:"Regular visits to keep your garden looking its best throughout the year.",price:"From \u00a345/visit"},
+  {category:"Maintenance",icon:"\u2702\ufe0f",name:"Hedge & Tree Work",desc:"Trimming, shaping, crown reductions and stump removal by qualified arborists.",price:"From \u00a360"},
+  {category:"Maintenance",icon:"\ud83c\udf31",name:"Lawn Care",desc:"Mowing, scarification, aeration, overseeding and feed programmes for a lush lawn.",price:"From \u00a335/visit"}
+];
+let activeCategory = "Design";
+
+function toggleEditor(){ document.getElementById("editor-panel").classList.toggle("open"); }
+function update(id,val){ const el=document.getElementById(id); if(el) el.textContent=val; }
+function setColor(v,val){ document.documentElement.style.setProperty(v,val); }
+function updateStat1Num(v){ const el=document.getElementById("stat1-num"); if(el) el.textContent=v; }
+function updateStat1Label(v){ const el=document.getElementById("stat1-label"); if(el) el.textContent=v; }
+
+const presets={
+  forest:{primary:"#1a2e1a",accent:"#5a9e4e",accent2:"#a8d5a0",bg:"#f4f7f4",bg2:"#e2ece2"},
+  slate:{primary:"#1a2030",accent:"#4a8fb0",accent2:"#7eb8d4",bg:"#f2f5f8",bg2:"#dde5ec"},
+  earth:{primary:"#2e2010",accent:"#b07830",accent2:"#d4a84b",bg:"#faf7f0",bg2:"#ede5d8"},
+  mono:{primary:"#1e1e1e",accent:"#606060",accent2:"#c8c8c8",bg:"#f5f5f5",bg2:"#e0e0e0"}
+};
+function applyPreset(name,e){
+  const p=presets[name]; if(!p) return;
+  [["--primary",p.primary],["--accent",p.accent],["--accent2",p.accent2],["--bg",p.bg],["--bg2",p.bg2]].forEach(([k,v])=>setColor(k,v));
+  document.getElementById("col-primary").value=p.primary;
+  document.getElementById("col-accent").value=p.accent;
+  document.getElementById("col-accent2").value=p.accent2;
+  document.getElementById("col-bg").value=p.bg;
+  document.querySelectorAll(".preset-btn").forEach(b=>b.classList.remove("active"));
+  e.target.classList.add("active");
+}
+
+function renderServices(){
+  const cats=[...new Set(serviceData.map(s=>s.category))];
+  document.getElementById("svc-tabs").innerHTML=cats.map(c=>`<button class="svc-tab ${c===activeCategory?"active":""}" onclick="setCategory('${c}')">${c}</button>`).join("");
+  const filtered=serviceData.filter(s=>s.category===activeCategory);
+  document.getElementById("svc-grid").innerHTML=filtered.map(s=>`<div class="svc-card"><div class="svc-icon">${s.icon}</div><div class="svc-name">${s.name}</div><div class="svc-desc">${s.desc}</div><div class="svc-price">${s.price}</div></div>`).join("");
+}
+function setCategory(c){ activeCategory=c; renderServices(); }
+
+function renderServiceEditor(){
+  document.getElementById("service-editor").innerHTML=serviceData.map((s,i)=>`
+    <div class="svc-item-editor">
+      <div class="row"><input type="text" placeholder="Emoji" value="${s.icon}" oninput="updateSvc(${i},'icon',this.value)" style="width:55px;flex:none"><input type="text" placeholder="Name" value="${s.name}" oninput="updateSvc(${i},'name',this.value)"><button class="remove-btn" onclick="removeSvc(${i})">x</button></div>
+      <div class="row"><input type="text" placeholder="Description" value="${s.desc}" oninput="updateSvc(${i},'desc',this.value)"></div>
+      <div class="row"><input type="text" placeholder="Price" value="${s.price}" oninput="updateSvc(${i},'price',this.value)" style="width:130px;flex:none"><input type="text" placeholder="Category" value="${s.category}" oninput="updateSvc(${i},'category',this.value)"></div>
+    </div>`).join("");
+}
+function updateSvc(i,f,v){ serviceData[i][f]=v; renderServices(); }
+function removeSvc(i){ serviceData.splice(i,1); renderServices(); renderServiceEditor(); }
+function addService(){ serviceData.push({category:activeCategory||"Design",icon:"\ud83c\udf3f",name:"New Service",desc:"Description here.",price:"POA"}); renderServices(); renderServiceEditor(); }
+
+function exportSite(){
+  const cs=getComputedStyle(document.documentElement);
+  const col={primary:cs.getPropertyValue("--primary").trim(),accent:cs.getPropertyValue("--accent").trim(),accent2:cs.getPropertyValue("--accent2").trim(),bg:cs.getPropertyValue("--bg").trim(),bg2:cs.getPropertyValue("--bg2").trim()};
+  const g=id=>document.getElementById(id)?.textContent?.trim()||"";
+  let out=document.documentElement.outerHTML
+    .replace(/--primary:\s*#[0-9a-fA-F]+/,`--primary: ${col.primary}`)
+    .replace(/--accent:\s*#[0-9a-fA-F]+;/,`--accent: ${col.accent};`)
+    .replace(/--accent2:\s*#[0-9a-fA-F]+/,`--accent2: ${col.accent2}`)
+    .replace(/--bg:\s*#[0-9a-fA-F]+;/,`--bg: ${col.bg};`)
+    .replace(/--bg2:\s*#[0-9a-fA-F]+/,`--bg2: ${col.bg2}`)
+    .replace(/let serviceData = \[[\s\S]*?\];/,`let serviceData = ${JSON.stringify(serviceData,null,2)};`);
+  const blob=new Blob([out],{type:"text/html"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download="york-landscapes-website.html"; a.click();
+  URL.revokeObjectURL(url);
+  const btn=document.getElementById("export-btn");
+  btn.textContent="\u2713 Downloaded!"; btn.classList.add("success");
+  setTimeout(()=>{btn.innerHTML="\u2b07 Save & Export Website";btn.classList.remove("success");},2500);
+}
+
+renderServices();
+renderServiceEditor();
+</script>
+</body>
+</html>
