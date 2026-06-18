@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>York Landscapes</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=DM+Sans:wght@300;400;500;700&amp;display=swap" rel="stylesheet">
 <style>
   :root {
     --primary: #1a2e1a;
@@ -219,22 +217,22 @@
 </head>
 <body>
 
-<button id="editor-toggle" onclick="toggleEditor()">&#9999;&#65039; CUSTOMISE</button>
+<button id="editor-toggle" onclick="toggleEditor()">✏️ CUSTOMISE</button>
 
-<div id="editor-panel">
+<div id="editor-panel" class="open">
   <div class="editor-header">
     <h2>Customise Your Site</h2>
     <p>Changes update live as you type</p>
-    <button id="export-btn" onclick="exportSite()">&#11015; Save &amp; Export Website</button>
+    <button id="export-btn" onclick="exportSite()">⬇ Save &amp; Export Website</button>
   </div>
 
   <div class="editor-section">
     <h3>Theme Presets</h3>
     <div class="preset-grid">
-      <button class="preset-btn active" style="background:#1a2e1a;color:#a8d5a0;border-color:#a8d5a0" onclick="applyPreset('forest',event)">&#127807; Forest</button>
-      <button class="preset-btn" style="background:#1a2030;color:#7eb8d4;border-color:#7eb8d4" onclick="applyPreset('slate',event)">&#127754; Slate</button>
-      <button class="preset-btn" style="background:#2e2010;color:#d4a84b;border-color:#d4a84b" onclick="applyPreset('earth',event)">&#129704; Earth</button>
-      <button class="preset-btn" style="background:#1e1e1e;color:#c8c8c8;border-color:#c8c8c8" onclick="applyPreset('mono',event)">&#11035; Mono</button>
+      <button class="preset-btn active" style="background:#1a2e1a;color:#a8d5a0;border-color:#a8d5a0" onclick="applyPreset('forest',event)">🌿 Forest</button>
+      <button class="preset-btn" style="background:#1a2030;color:#7eb8d4;border-color:#7eb8d4" onclick="applyPreset('slate',event)">🌊 Slate</button>
+      <button class="preset-btn" style="background:#2e2010;color:#d4a84b;border-color:#d4a84b" onclick="applyPreset('earth',event)">🪨 Earth</button>
+      <button class="preset-btn" style="background:#1e1e1e;color:#c8c8c8;border-color:#c8c8c8" onclick="applyPreset('mono',event)">⬛ Mono</button>
     </div>
   </div>
 
@@ -269,7 +267,47 @@
 
   <div class="editor-section">
     <h3>Services</h3>
-    <div id="service-editor"></div>
+    <div id="service-editor">
+    <div class="svc-item-editor">
+      <div class="row"><input type="text" placeholder="Emoji" value="✏️" oninput="updateSvc(0,'icon',this.value)" style="width:55px;flex:none"><input type="text" placeholder="Name" value="Garden Design" oninput="updateSvc(0,'name',this.value)"><button class="remove-btn" onclick="removeSvc(0)">x</button></div>
+      <div class="row"><input type="text" placeholder="Description" value="Full design service from initial concept to planting plans and 3D visualisations." oninput="updateSvc(0,'desc',this.value)"></div>
+      <div class="row"><input type="text" placeholder="Price" value="From £400" oninput="updateSvc(0,'price',this.value)" style="width:130px;flex:none"><input type="text" placeholder="Category" value="Design" oninput="updateSvc(0,'category',this.value)"></div>
+    </div>
+    <div class="svc-item-editor">
+      <div class="row"><input type="text" placeholder="Emoji" value="🌳" oninput="updateSvc(1,'icon',this.value)" style="width:55px;flex:none"><input type="text" placeholder="Name" value="Planting Schemes" oninput="updateSvc(1,'name',this.value)"><button class="remove-btn" onclick="removeSvc(1)">x</button></div>
+      <div class="row"><input type="text" placeholder="Description" value="Seasonal colour, structure planting and wildlife-friendly borders tailored to your soil." oninput="updateSvc(1,'desc',this.value)"></div>
+      <div class="row"><input type="text" placeholder="Price" value="From £200" oninput="updateSvc(1,'price',this.value)" style="width:130px;flex:none"><input type="text" placeholder="Category" value="Design" oninput="updateSvc(1,'category',this.value)"></div>
+    </div>
+    <div class="svc-item-editor">
+      <div class="row"><input type="text" placeholder="Emoji" value="🧱" oninput="updateSvc(2,'icon',this.value)" style="width:55px;flex:none"><input type="text" placeholder="Name" value="Patios &amp; Paving" oninput="updateSvc(2,'name',this.value)"><button class="remove-btn" onclick="removeSvc(2)">x</button></div>
+      <div class="row"><input type="text" placeholder="Description" value="Natural stone, porcelain and block paving installed to last. All groundwork included." oninput="updateSvc(2,'desc',this.value)"></div>
+      <div class="row"><input type="text" placeholder="Price" value="From £1,200" oninput="updateSvc(2,'price',this.value)" style="width:130px;flex:none"><input type="text" placeholder="Category" value="Construction" oninput="updateSvc(2,'category',this.value)"></div>
+    </div>
+    <div class="svc-item-editor">
+      <div class="row"><input type="text" placeholder="Emoji" value="🪵" oninput="updateSvc(3,'icon',this.value)" style="width:55px;flex:none"><input type="text" placeholder="Name" value="Decking &amp; Structures" oninput="updateSvc(3,'name',this.value)"><button class="remove-btn" onclick="removeSvc(3)">x</button></div>
+      <div class="row"><input type="text" placeholder="Description" value="Hardwood and composite decking, pergolas, raised beds and bespoke garden buildings." oninput="updateSvc(3,'desc',this.value)"></div>
+      <div class="row"><input type="text" placeholder="Price" value="From £800" oninput="updateSvc(3,'price',this.value)" style="width:130px;flex:none"><input type="text" placeholder="Category" value="Construction" oninput="updateSvc(3,'category',this.value)"></div>
+    </div>
+    <div class="svc-item-editor">
+      <div class="row"><input type="text" placeholder="Emoji" value="💧" oninput="updateSvc(4,'icon',this.value)" style="width:55px;flex:none"><input type="text" placeholder="Name" value="Water Features" oninput="updateSvc(4,'name',this.value)"><button class="remove-btn" onclick="removeSvc(4)">x</button></div>
+      <div class="row"><input type="text" placeholder="Description" value="Ponds, rills, fountains and naturalistic streams designed and built from scratch." oninput="updateSvc(4,'desc',this.value)"></div>
+      <div class="row"><input type="text" placeholder="Price" value="From £600" oninput="updateSvc(4,'price',this.value)" style="width:130px;flex:none"><input type="text" placeholder="Category" value="Construction" oninput="updateSvc(4,'category',this.value)"></div>
+    </div>
+    <div class="svc-item-editor">
+      <div class="row"><input type="text" placeholder="Emoji" value="🌿" oninput="updateSvc(5,'icon',this.value)" style="width:55px;flex:none"><input type="text" placeholder="Name" value="Garden Maintenance" oninput="updateSvc(5,'name',this.value)"><button class="remove-btn" onclick="removeSvc(5)">x</button></div>
+      <div class="row"><input type="text" placeholder="Description" value="Regular visits to keep your garden looking its best throughout the year." oninput="updateSvc(5,'desc',this.value)"></div>
+      <div class="row"><input type="text" placeholder="Price" value="From £45/visit" oninput="updateSvc(5,'price',this.value)" style="width:130px;flex:none"><input type="text" placeholder="Category" value="Maintenance" oninput="updateSvc(5,'category',this.value)"></div>
+    </div>
+    <div class="svc-item-editor">
+      <div class="row"><input type="text" placeholder="Emoji" value="✂️" oninput="updateSvc(6,'icon',this.value)" style="width:55px;flex:none"><input type="text" placeholder="Name" value="Hedge &amp; Tree Work" oninput="updateSvc(6,'name',this.value)"><button class="remove-btn" onclick="removeSvc(6)">x</button></div>
+      <div class="row"><input type="text" placeholder="Description" value="Trimming, shaping, crown reductions and stump removal by qualified arborists." oninput="updateSvc(6,'desc',this.value)"></div>
+      <div class="row"><input type="text" placeholder="Price" value="From £60" oninput="updateSvc(6,'price',this.value)" style="width:130px;flex:none"><input type="text" placeholder="Category" value="Maintenance" oninput="updateSvc(6,'category',this.value)"></div>
+    </div>
+    <div class="svc-item-editor">
+      <div class="row"><input type="text" placeholder="Emoji" value="🌱" oninput="updateSvc(7,'icon',this.value)" style="width:55px;flex:none"><input type="text" placeholder="Name" value="Lawn Care" oninput="updateSvc(7,'name',this.value)"><button class="remove-btn" onclick="removeSvc(7)">x</button></div>
+      <div class="row"><input type="text" placeholder="Description" value="Mowing, scarification, aeration, overseeding and feed programmes for a lush lawn." oninput="updateSvc(7,'desc',this.value)"></div>
+      <div class="row"><input type="text" placeholder="Price" value="From £35/visit" oninput="updateSvc(7,'price',this.value)" style="width:130px;flex:none"><input type="text" placeholder="Category" value="Maintenance" oninput="updateSvc(7,'category',this.value)"></div>
+    </div></div>
     <button class="add-btn" onclick="addService()">+ Add Service</button>
   </div>
 
@@ -289,7 +327,7 @@ Sunday: Closed</textarea></div>
   <div class="hero-photo"></div>
   <div class="hero-content">
     <div class="hero-tag">Based in York, North Yorkshire</div>
-    <h1 id="company-name">York <em>Landscapes</em></h1>
+    <h1 id="company-name">HS Landscapes TEST WEBSITE</h1>
     <p class="hero-desc" id="hero-desc">From garden design to full landscaping, we bring your outdoor vision to life - beautifully crafted, built to last.</p>
     <div class="hero-btns">
       <a href="#services" class="btn-primary">Our Services</a>
@@ -331,8 +369,8 @@ Sunday: Closed</textarea></div>
       <div class="section-tag">What We Do</div>
       <h2 id="company-tagline">Transforming outdoor spaces across Yorkshire</h2>
     </div>
-    <div class="services-tabs" id="svc-tabs"></div>
-    <div class="services-grid" id="svc-grid"></div>
+    <div class="services-tabs" id="svc-tabs"><button class="svc-tab active" onclick="setCategory('Design')">Design</button><button class="svc-tab " onclick="setCategory('Construction')">Construction</button><button class="svc-tab " onclick="setCategory('Maintenance')">Maintenance</button></div>
+    <div class="services-grid" id="svc-grid"><div class="svc-card"><div class="svc-icon">✏️</div><div class="svc-name">Garden Design</div><div class="svc-desc">Full design service from initial concept to planting plans and 3D visualisations.</div><div class="svc-price">From £400</div></div><div class="svc-card"><div class="svc-icon">🌳</div><div class="svc-name">Planting Schemes</div><div class="svc-desc">Seasonal colour, structure planting and wildlife-friendly borders tailored to your soil.</div><div class="svc-price">From £200</div></div></div>
   </div>
 </section>
 
@@ -341,12 +379,12 @@ Sunday: Closed</textarea></div>
   <h2>Let's Talk About Your Garden</h2>
   <p>Whether you have a clear vision or just a rough idea, we would love to hear from you. We offer free, no-obligation quotes across York and the surrounding area.</p>
   <div class="contact-cards">
-    <div class="contact-card"><div class="icon">&#128205;</div><h3>Location</h3><p id="company-address">Unit 4, Skelton Industrial Estate, York, YO30 1NP</p></div>
-    <div class="contact-card"><div class="icon">&#128336;</div><h3>Hours</h3><p id="company-hours" style="white-space:pre-line">Mon-Fri: 7:30am - 5:30pm
+    <div class="contact-card"><div class="icon">📍</div><h3>Location</h3><p id="company-address">Unit 4, Skelton Industrial Estate, York, YO30 1NP</p></div>
+    <div class="contact-card"><div class="icon">🕐</div><h3>Hours</h3><p id="company-hours" style="white-space:pre-line">Mon-Fri: 7:30am - 5:30pm
 Saturday: 8:00am - 1:00pm
 Sunday: Closed</p></div>
-    <div class="contact-card"><div class="icon">&#128222;</div><h3>Call Us</h3><p id="company-phone">01904 567 890</p></div>
-    <div class="contact-card"><div class="icon">&#9993;&#65039;</div><h3>Email</h3><p id="company-email">info@yorklandscapes.co.uk</p></div>
+    <div class="contact-card"><div class="icon">📞</div><h3>Call Us</h3><p id="company-phone"><a href="tel:01904 567 890">01904 567 890</a></p></div>
+    <div class="contact-card"><div class="icon">✉️</div><h3>Email</h3><p id="company-email">info@yorklandscapes.co.uk</p></div>
   </div>
 </section>
 
@@ -354,14 +392,62 @@ Sunday: Closed</p></div>
 
 <script>
 let serviceData = [
-  {category:"Design",icon:"\u270f\ufe0f",name:"Garden Design",desc:"Full design service from initial concept to planting plans and 3D visualisations.",price:"From \u00a3400"},
-  {category:"Design",icon:"\ud83c\udf33",name:"Planting Schemes",desc:"Seasonal colour, structure planting and wildlife-friendly borders tailored to your soil.",price:"From \u00a3200"},
-  {category:"Construction",icon:"\ud83e\uddf1",name:"Patios & Paving",desc:"Natural stone, porcelain and block paving installed to last. All groundwork included.",price:"From \u00a31,200"},
-  {category:"Construction",icon:"\ud83e\udeb5",name:"Decking & Structures",desc:"Hardwood and composite decking, pergolas, raised beds and bespoke garden buildings.",price:"From \u00a3800"},
-  {category:"Construction",icon:"\ud83d\udca7",name:"Water Features",desc:"Ponds, rills, fountains and naturalistic streams designed and built from scratch.",price:"From \u00a3600"},
-  {category:"Maintenance",icon:"\ud83c\udf3f",name:"Garden Maintenance",desc:"Regular visits to keep your garden looking its best throughout the year.",price:"From \u00a345/visit"},
-  {category:"Maintenance",icon:"\u2702\ufe0f",name:"Hedge & Tree Work",desc:"Trimming, shaping, crown reductions and stump removal by qualified arborists.",price:"From \u00a360"},
-  {category:"Maintenance",icon:"\ud83c\udf31",name:"Lawn Care",desc:"Mowing, scarification, aeration, overseeding and feed programmes for a lush lawn.",price:"From \u00a335/visit"}
+  {
+    "category": "Design",
+    "icon": "✏️",
+    "name": "Garden Design",
+    "desc": "Full design service from initial concept to planting plans and 3D visualisations.",
+    "price": "From £400"
+  },
+  {
+    "category": "Design",
+    "icon": "🌳",
+    "name": "Planting Schemes",
+    "desc": "Seasonal colour, structure planting and wildlife-friendly borders tailored to your soil.",
+    "price": "From £200"
+  },
+  {
+    "category": "Construction",
+    "icon": "🧱",
+    "name": "Patios & Paving",
+    "desc": "Natural stone, porcelain and block paving installed to last. All groundwork included.",
+    "price": "From £1,200"
+  },
+  {
+    "category": "Construction",
+    "icon": "🪵",
+    "name": "Decking & Structures",
+    "desc": "Hardwood and composite decking, pergolas, raised beds and bespoke garden buildings.",
+    "price": "From £800"
+  },
+  {
+    "category": "Construction",
+    "icon": "💧",
+    "name": "Water Features",
+    "desc": "Ponds, rills, fountains and naturalistic streams designed and built from scratch.",
+    "price": "From £600"
+  },
+  {
+    "category": "Maintenance",
+    "icon": "🌿",
+    "name": "Garden Maintenance",
+    "desc": "Regular visits to keep your garden looking its best throughout the year.",
+    "price": "From £45/visit"
+  },
+  {
+    "category": "Maintenance",
+    "icon": "✂️",
+    "name": "Hedge & Tree Work",
+    "desc": "Trimming, shaping, crown reductions and stump removal by qualified arborists.",
+    "price": "From £60"
+  },
+  {
+    "category": "Maintenance",
+    "icon": "🌱",
+    "name": "Lawn Care",
+    "desc": "Mowing, scarification, aeration, overseeding and feed programmes for a lush lawn.",
+    "price": "From £35/visit"
+  }
 ];
 let activeCategory = "Design";
 
@@ -432,5 +518,5 @@ function exportSite(){
 renderServices();
 renderServiceEditor();
 </script>
-</body>
-</html>
+
+</body></html>
